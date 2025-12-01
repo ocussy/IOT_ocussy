@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wilplayground-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+  #where to find the source files
+    repoURL: https://github.com/ocussy/IOT
+    targetRevision: HEAD
+    path: ./
+  destination:
+  #where to deploy
+    server: https://kubernetes.default.svc
+    namespace: dev
+  syncPolicy:
+    syncOptions:
+    #create namespace if not created
+      - CreateNamespace=true
+
+  #1. enable automatic sync
+    automated:
+    #2. enable automatic self-healing
+      selfHeal: true
+    #3. enable automatic pruning
+      prune: true

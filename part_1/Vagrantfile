@@ -1,0 +1,34 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/ubuntu2204"
+  
+  config.vm.boot_timeout = 600
+
+  config.vm.provider "libvirt" do |hv|
+    hv.driver = "qemu"
+    hv.cpus = "1"
+    hv.memory = "1536"
+  end
+
+  k3s_token= "super_token_tres_secure"
+  # Machine 1
+  config.vm.define "ocussy" do |ocussy|
+    ocussy.vm.network :private_network, ip: "192.168.56.110"
+    ocussy.vm.hostname = "ocussyS"
+
+    ocussy.vm.provision "shell", inline: <<-SHELL
+      echo "Installation of K3s Master..."
+      curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --node-ip 192.168.56.110 --flannel-iface eth1" K3S_TOKEN=#{k3s_token} sh -
+    SHELL
+  end
+  
+  # Machine 2
+  config.vm.define "cornguye" do |cornguye|
+    cornguye.vm.network :private_network, ip: "192.168.56.111"
+    cornguye.vm.hostname = "cornguyeSW"
+
+    cornguye.vm.provision "shell", inline: <<-SHELL
+      echo "Installation of K3s agent"
+      curl -sfL https://get.k3s.io | K3S_URL=https://192.168.56.110:6443 K3S_TOKEN=#{k3s_token} INSTALL_K3S_EXEC="agent --node-ip 192.168.56.111 -- flannel-iface eth1" sh -
+    SHELL
+  end
+end
