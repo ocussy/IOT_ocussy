@@ -1,22 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: playground-deployment
-  namespace: dev-app
+  name: wilplayground-deployment
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: playground
+      app: wilplayground
   template:
     metadata:
       labels:
-        app: playground
+        app: wilplayground
     spec:
       containers:
-      - name: playground
-        # C'est ICI que tout se joue pour la version !
-        # On commence par la v1. Pour passer en v2, tu modifieras juste ce fichier.
+      - name: wilplayground
         image: wil42/playground:v2
         ports:
         - containerPort: 8888

@@ -1,13 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: playground-service
-  namespace: dev-app
+  name: wilplayground-service
 spec:
-  type: LoadBalancer # Sur K3d, ça permet d'avoir une IP accessible (si configuré) ou on utilisera le Port-Forward
   ports:
   - port: 8888
     targetPort: 8888
     protocol: TCP
   selector:
-    app: playground
+    app: willplayground
