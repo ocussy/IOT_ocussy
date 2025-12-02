@@ -47,13 +47,14 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 echo "⏳ Waiting for ArgoCD server to start (timeout 5m)..."
 kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s
 
-# 8. Apply ArgoCD App
-echo "🚀 Applying ArgoCD application..."
+#8. Deploy Application via ArgoCD
+echo "📥 Deploying application via ArgoCD..."
 kubectl apply -f ../confs/app.yaml
 
-# 9. Get Admin Password (FIXED METHOD)
+# 8. Get Admin Password (FIXED METHOD)
 # We use kubectl because 'argocd' CLI is not installed
 echo "🔑 Retrieving admin password..."
+PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
 
 echo ""
 echo "--- SETUP COMPLETE ---"
