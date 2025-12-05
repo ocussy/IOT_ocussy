@@ -1,3 +1,7 @@
+# Ingress is tracking routes and redirecting traffic to the appropriate services:
+# - app1.com to app1-svc
+# - app2.com to app2-svc
+# - app3.com and default to app3-svc
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

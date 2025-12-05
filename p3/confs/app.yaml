@@ -1,3 +1,5 @@
+# configures an ArgoCD Application
+# it deploys the app given by the path hosted in git repo
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -7,7 +9,7 @@ spec:
   project: default
   source:
   #where to find the source files
-    repoURL: https://github.com/ocussy/IOT
+    repoURL: https://github.com/ocussy/IOT_ocussy
     targetRevision: HEAD
     path: ./p3/confs/app
   destination:
@@ -19,9 +21,9 @@ spec:
     #create namespace if not created
       - CreateNamespace=true
 
-  #1. enable automatic sync
+  # enable automatic sync
     automated:
-    #2. enable automatic self-healing
+    # enable automatic self-healing
       selfHeal: true
-    #3. enable automatic pruning
+    # enable automatic pruning
       prune: true

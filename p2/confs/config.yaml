@@ -1,3 +1,5 @@
+# configures three k3s ConfigMaps
+# we inject web pages into pods as configuration files.
 apiVersion: v1
 kind: ConfigMap
 metadata:

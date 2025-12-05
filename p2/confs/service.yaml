@@ -1,3 +1,5 @@
+# exposes the app pods as network services
+# allows Ingress to send traffic to them
 apiVersion: v1
 kind: Service
 metadata:

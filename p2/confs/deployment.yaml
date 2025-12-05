@@ -1,3 +1,6 @@
+# configures three k3s deployments
+# each one creates and manages nginx pods
+# each index.html for each app is loaded from their ConfigMap
 apiVersion: apps/v1
 kind: Deployment
 metadata:

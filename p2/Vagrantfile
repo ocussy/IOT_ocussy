@@ -2,24 +2,25 @@ Vagrant.configure("2") do |config|
     config.vm.box = "generic/ubuntu2204"
     config.vm.boot_timeout = 600
 
+    #provides the configuration for the k3s node
     config.vm.provider "libvirt" do |hv|
         hv.driver = "qemu"
         hv.cpus = "2"
         hv.memory = "2000"
     end
 
-    k3s_token= "bonjour_je_suis_bob"
-
+    #configuration of the cluster
     config.vm.define "ocussy" do |ocussy|
         ocussy.vm.network :private_network, ip: "192.168.56.110"
         ocussy.vm.hostname = "ocussyS"
 
         ocussy.vm.provision "shell", inline: <<-SHELL
             echo "Installation of K3s..."
-            curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" INSTALL_K3S_EXEC="server --node-ip 192.168.56.110 --flannel-iface eth1" K3S_TOKEN=#{k3s_token} sh -
+             # install k3s in server mode with the 192.168.56.110 Ip address and flannel on eth1 (private network)
+            curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" INSTALL_K3S_EXEC="server --node-ip 192.168.56.110 --flannel-iface eth1" sh -
         SHELL
 
-        # copy files
+        # copy files into the node
         ocussy.vm.provision "file", source: "./confs/deployment.yaml", destination: "/tmp/deployment.yaml"
         ocussy.vm.provision "file", source: "./confs/config.yaml", destination: "/tmp/config.yaml"
         ocussy.vm.provision "file", source: "./confs/service.yaml", destination: "/tmp/service.yaml"
@@ -36,17 +37,34 @@ Vagrant.configure("2") do |config|
 
             echo "K3s is ready !"
 
-            echo "Application deployment..."
+            #applies config files to the node
+            echo "Applying K3S configurations..."
             kubectl apply -f /tmp/config.yaml
             kubectl apply -f /tmp/service.yaml
             kubectl apply -f /tmp/deployment.yaml
             kubectl apply -f /tmp/ingress.yaml
 
-
-            echo "Restarting deployments to apply changes..."
             kubectl rollout restart deployment/app1 || true
             kubectl rollout restart deployment/app2 || true
             kubectl rollout restart deployment/app3 || true
+            
+            echo "Waiting for Traefik to be deployed..."
+            while ! kubectl get deployment traefik -n kube-system > /dev/null 2>&1; do
+                sleep 5
+            done
+            
+            kubectl wait --for=condition=available --timeout=600s deployment/traefik -n kube-system
+            
+            echo "Traefik is ready !"
+            # -----------------------------------------------
+            echo "Waiting for apps to be ready"
+            
+            # we wait for the deployment of each app to be available
+            kubectl wait --for=condition=available --timeout=600s deployment/app1
+            kubectl wait --for=condition=available --timeout=600s deployment/app2
+            kubectl wait --for=condition=available --timeout=600s deployment/app3
+
+            echo "All applications are ready and accessible!"
             
         SHELL
     end
